@@ -44,10 +44,8 @@ export default {
   name: 'app',
   data () {
     return {
-      privateKey:'5JDGorYKezHXvjPzTiePUqQ3ugGVVihrbjv5YNQrQsMfwjNoQfN',
-      trx:`
-{"tr_buffer":"1b2371861969ad1dbd580100ad0200000000000071edbe09bda206102700000000000071000000","chain_id":"4018d7844c78f6a6c41c6a552b898022310fc5dec06da467ee7905a8dad512c8","ref_block_num":8987,"ref_block_prefix":1763280497,"expiration":"2017-03-06T08:28:29","operations":[[0,{"fee":{"amount":"685","asset_id":"1.3.113"},"from":"1.2.155501","to":"1.2.102717","amount":{"amount":"10000","asset_id":"1.3.113"},"extensions":[]}]],"extensions":[],"signatures":[]}
-`      ,
+      privateKey:'',
+      trx:``      ,
       signed:'',
       formatted:''
     }
