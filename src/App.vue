@@ -31,7 +31,7 @@
 			<br/>
 			<button v-on:click='addSignature'>Add Signature</button>
 			<span>{{hash256}}</span>
-			<qrcode-vue :value="hash256"/>
+			<qrcode-vue :value="hash256" size="256" />
 		</div>
             <pre>{{formatted}}</pre>
           </td>
@@ -43,6 +43,7 @@
         <tr>
           <td colspan="2" style='text-align: center'>
             <button @click='signIt'>Sign</button>
+            <button @click='broadcast'>Broadcast</button>
           </td>
         </tr>
       </tbody>
@@ -77,6 +78,16 @@ export default {
     }
   },
   methods: {
+    broadcast: async function() {
+      var result = await fetch('http://btsbotfund.com:8080/bts/broadcast', {
+	method: 'POST',
+	headers: {
+	        'Content-Type': 'application/json'
+    	},
+	body: this.signed
+	});
+	alert(await result.text());
+    },
     updatePublicKey: function() {
       var prvKey = PrivateKey.fromWif(this.privateKey)
       this.publicKey = prvKey.toPublicKey().toString('BTS')
