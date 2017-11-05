@@ -25,6 +25,14 @@
         <tr>
           <td>Formatted Transaction:</td>
           <td>
+		<div v-if='hash256'>
+			Signature:
+			<input v-model='signature'/>
+			<br/>
+			<button v-on:click='addSignature'>Add Signature</button>
+			<span>{{hash256}}</span>
+			<qrcode-vue :value="hash256"/>
+		</div>
             <pre>{{formatted}}</pre>
           </td>
         </tr>
@@ -43,15 +51,19 @@
 </template>
 
 <script>
-import {ChainStore, FetchChain, PrivateKey, TransactionHelper, Aes, TransactionBuilder, ops} from "bitsharesjs";
+import {ChainStore, FetchChain, PrivateKey, TransactionHelper, Aes, TransactionBuilder, ops, hash} from "bitsharesjs";
 import {ChainConfig} from "bitsharesjs-ws";
 import {extend} from 'lodash'
 import * as jsonFormat from 'json-format'
 import * as ByteBuffer from 'bytebuffer'
+import QrcodeVue from 'qrcode.vue';
 console.log(ChainConfig)
 ChainConfig.address_prefix = 'BTS'
 export default {
   name: 'app',
+  components: {
+    QrcodeVue
+  },
   data: function () {
     return {
       privateKey:'',
@@ -59,6 +71,8 @@ export default {
       trx:'' ,
       signed:'',
       formatted:'',
+      signature:'',
+	hash256:'',
       chainId:'4018d7844c78f6a6c41c6a552b898022310fc5dec06da467ee7905a8dad512c8'
     }
   },
@@ -66,6 +80,18 @@ export default {
     updatePublicKey: function() {
       var prvKey = PrivateKey.fromWif(this.privateKey)
       this.publicKey = prvKey.toPublicKey().toString('BTS')
+    },
+    addSignature: function() {
+      try {
+        var tx = new TransactionBuilder()
+        var tx = extend(tx, ops.transaction.fromHex(this.trx))
+        tx.tr_buffer = new Buffer(this.trx, 'hex')
+        console.log(tx)
+        tx.signatures.push(new Buffer(this.signature, 'hex'))
+        this.signed = JSON.stringify(tx.toObject())
+      } catch (e) {
+        alert(e.stack)
+      }
     },
     signIt: function() {
       try {
@@ -87,6 +113,8 @@ export default {
     },
     formatJson:function (txt) {
       var obj = ops.transaction.toObject(ops.transaction.fromHex(this.trx))
+      var signature = hash.sha256(Buffer.concat([new Buffer(this.chainId, 'hex'), new Buffer(this.trx, 'hex')]));
+      this.hash256 = signature.toString("hex");
       console.log(jsonFormat(obj))
       return jsonFormat(obj)
     }
