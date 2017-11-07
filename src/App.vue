@@ -18,7 +18,7 @@
         <tr>
           <td>Transaction Buffer(Hex):</td>
           <td>
-            <textarea rows="10" cols='80' v-model='trx' @keyup='formatted = formatJson(trx)'>
+            <textarea rows="10" cols='80' v-model='trx' @keyup='formatted = formatJson(trx)' @change='formatted = formatJson(trx)'>
             </textarea>
           </td>
         </tr>
@@ -52,10 +52,11 @@
 </template>
 
 <script>
+import 'babel-polyfill'
 import {ChainStore, FetchChain, PrivateKey, TransactionHelper, Aes, TransactionBuilder, ops, hash} from "bitsharesjs";
 import {ChainConfig} from "bitsharesjs-ws";
 import {extend} from 'lodash'
-import * as jsonFormat from 'json-format'
+import jsonFormat from 'json-format'
 import * as ByteBuffer from 'bytebuffer'
 import QrcodeVue from 'qrcode.vue';
 console.log(ChainConfig)
@@ -79,6 +80,7 @@ export default {
   },
   methods: {
     broadcast: async function() {
+	try {
       var result = await fetch('http://btsbotfund.com:8080/bts/broadcast', {
 	method: 'POST',
 	headers: {
@@ -87,6 +89,9 @@ export default {
 	body: this.signed
 	});
 	alert(await result.text());
+	}catch(e) {
+	alert(e.stack);
+	}
     },
     updatePublicKey: function() {
       var prvKey = PrivateKey.fromWif(this.privateKey)
@@ -98,7 +103,12 @@ export default {
         var tx = extend(tx, ops.transaction.fromHex(this.trx))
         tx.tr_buffer = new Buffer(this.trx, 'hex')
         console.log(tx)
-        tx.signatures.push(new Buffer(this.signature, 'hex'))
+	var hex;
+	hex = new Buffer(this.signature, 'hex');
+	if (hex.length<10) {
+		hex = new Buffer(this.signature,'base64');
+	}
+        tx.signatures.push(hex)
         this.signed = JSON.stringify(tx.toObject())
       } catch (e) {
         alert(e.stack)
