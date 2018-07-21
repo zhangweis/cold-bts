@@ -10,7 +10,7 @@
         </tr>
         <tr>
           <td>Private Key:</td>
-          <td><input v-model='privateKey' size='80' @keyup='updatePublicKey'/>
+          <td><input type='password' v-model='privateKey' size='80' @keyup='updatePublicKey'/>
           <br/>
           {{publicKey}}
           </td>
@@ -18,9 +18,11 @@
         <tr>
           <td>Transaction Buffer(Hex):</td>
           <td>
-            <textarea rows="10" cols='80' v-model='trx' @keyup='formatted = formatJson(trx)' @change='formatted = formatJson(trx)'>
+            <textarea rows="10" cols='80' v-model='trx' @keyup='trxChanged' @change='formatted = formatJson(trx)'>
             </textarea>
-          </td>
+ <br/>
+ 			<qrcode-vue v-if='trx' :value="trx" size="256" />
+         </td>
         </tr>
         <tr>
           <td>Formatted Transaction:</td>
@@ -30,6 +32,8 @@
 			<input v-model='signature'/>
 			<br/>
 			<button v-on:click='addSignature'>Add Signature</button>
+			<button @click='broadcast'>Broadcast</button>
+			<br/>
 			<span>{{hash256}}</span>
 			<qrcode-vue :value="hash256" size="256" />
 		</div>
@@ -38,12 +42,11 @@
         </tr>
         <tr>
           <td>Signed Trx:</td>
-          <td><textarea rows="20" cols='80' v-model='signed' readonly='true'/></td>
+          <td><textarea rows="20" cols='80' v-model='signed' /></td>
         </tr>
         <tr>
           <td colspan="2" style='text-align: center'>
             <button @click='signIt'>Sign</button>
-            <button @click='broadcast'>Broadcast</button>
           </td>
         </tr>
       </tbody>
@@ -81,7 +84,7 @@ export default {
   methods: {
     broadcast: async function() {
 	try {
-      var result = await fetch('http://btsbotfund.com:8080/bts/broadcast', {
+      var result = await fetch('//bts.dexfree.com/bts/broadcast', {
 	method: 'POST',
 	headers: {
 	        'Content-Type': 'application/json'
@@ -131,6 +134,10 @@ export default {
         console.error(e)
       }
       // alert(`sign ${this.privateKey}, ${this.trx}`)
+    },
+    trxChanged: function() {
+      this.formatted = this.formatJson(this.trx);
+      
     },
     formatJson:function (txt) {
       var obj = ops.transaction.toObject(ops.transaction.fromHex(this.trx))
