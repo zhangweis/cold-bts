@@ -18,7 +18,7 @@ module.exports = {
   entry: './src/main.js',
   output: {
     path: path.resolve(__dirname, './dist'),
-    publicPath: '/dist/',
+    publicPath: MODE_DEV_SERVER?'':'./dist/',
     filename: 'build.js'
   },
   module: {
